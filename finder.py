@@ -4,7 +4,7 @@ from urllib.request import urlopen as uReq
 
 def usage():
 	print('[!] usage: python3 finder.py <service> <name>\n'\
-	'[+] services: twiter, instagram, youtube')
+	'[+] services: twiter, youtube')
 	sys.exit()
 	return
 
@@ -59,10 +59,6 @@ def twiter_scraper(name):
 
 	except Exception:
 		print("This user doesn't exist.")
-
-
-def instagram_scraper(name):
-	pass
 
 def youtube_scraper(name):
 	try:
