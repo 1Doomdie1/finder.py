@@ -292,6 +292,21 @@ def youtube_scraper(name):
 	except Exception:
 		print("[-]This user doesn't exist!")
 
+
+def instagram_scraper(name):
+	my_url = "https://instagram.com/" + name
+	uPage = uReq(my_url)
+	read_page = uPage.read()
+	uPage.close()
+	page_soup = soup(read_page, "html.parser")
+
+	a = page_soup.find("script", {"type":"application/ld+json"})
+	b = str(a).split(',')
+	for i in b:
+		edited = i.replace('\n', '').replace(' ', '').replace('\/', '/').replace('@','').replace('"', '').replace('</script>', '').replace('<scripttype=application/ld+json>', '').replace('{','').replace('}','')
+		print('[+]' + edited)
+
+
 def main():
 	if len(sys.argv) != 3:
 		usage()
@@ -302,6 +317,8 @@ def main():
 		twitter_scraper(name)
 	elif service == 'youtube' or service == 'yt':
 		youtube_scraper(name)
+	elif service == 'instagram' or service == 'insta':
+		instagram_scraper(name)
 	else:
 		print(f'[-] ERROR: unknown service: {service}')
 		os._exit(1)
