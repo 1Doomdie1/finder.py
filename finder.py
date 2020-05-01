@@ -8,7 +8,7 @@ def usage():
 	sys.exit()
 	return
 
-def twiter_scraper(name):
+def twitter_scraper(name):
 	try:
 		my_url = "https://twitter.com/" + name
 		uPage = uReq(my_url)
@@ -30,10 +30,10 @@ def twiter_scraper(name):
 		location = getting_location.text.replace('\n', '').replace('              ', '').replace('        ', '.').replace("\n", '')
 		profile_header = getting_profile_header.text
 
-		print("-> He/She is followed by " + followers_count + "people.")
-		print("-> He/She is following "+ following_count + "people.")
-		print("-> He/She has " + tweets_cont +"tweets.")
-		print("-> He/She joined twitter on " + date_of_joining +".")
+		print("[+]Followed by " + followers_count + "people.")
+		print("[+]Following "+ following_count + "people.")
+		print("[+]" + tweets_cont +"tweets.")
+		print("[+]Joined twitter on " + date_of_joining +".")
 
 		try:
 			getting_bday = page_soup.find("span", {"title":"Public"})
@@ -42,23 +42,23 @@ def twiter_scraper(name):
 			bday = getting_bday.text.replace("    Born ", '').replace('\n', '')
 			linked_sites = getting_linked_sites.a['title']
 			
-			print("-> He/She is born in "+ bday +".")
-			print("-> Linked site: "+ linked_sites)
+			print("[+]Born in "+ bday +".")
+			print("[+]Linked site: "+ linked_sites)
 		except Exception:
 			pass			
 
 		if len(location) == 0:
 			pass
 		else:
-			print("-> He/She leaves in "+ location)
+			print("[+]Leaves in "+ location)
 
 		if len(profile_header) == 0:
 			pass
 		else:
-			print("-> Profile header: " + profile_header)
+			print("[+]Profile header: " + profile_header)
 
 	except Exception:
-		print("This user doesn't exist.")
+		print("[-]This user doesn't exist.")
 
 def youtube_scraper(name):
 	try:
@@ -290,19 +290,16 @@ def youtube_scraper(name):
 					else:
 						print('')
 	except Exception:
-		print("This user doesn't exist!")
+		print("[-]This user doesn't exist!")
 
 def main():
 	if len(sys.argv) != 3:
 		usage()
 	s = sys.argv
 	service, name= s[1],s[2]
-	if service == 'facebook' or service == 'fb':
-		facebook_scraper(name)
-	elif service == 'twitter' or service == 'tw':
-		twiter_scraper(name)
-	elif service == 'instagram' or service == 'insta':
-		instagram_scarper(name)
+
+	if service == 'twitter' or service == 'tw':
+		twitter_scraper(name)
 	elif service == 'youtube' or service == 'yt':
 		youtube_scraper(name)
 	else:
