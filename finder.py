@@ -2,6 +2,7 @@ import sys, os, requests
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen as uReq
 
+
 def usage():
 	print('[!] usage: python3 finder.py <service> <name>\n'\
 	'[+] services: twiter, youtube, instagram, github')
