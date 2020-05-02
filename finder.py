@@ -8,6 +8,22 @@ def usage():
 	sys.exit()
 	return
 
+def beautify_link(link_to_beautifi):
+	for i in link_to_beautifi:
+		link = i.a["href"].split('&')
+		if link[0].startswith('/redirect?q='):
+			print('    [+]' + link[0].replace('/redirect?q=','').replace('%3A',':').replace('%2F','/'))
+		elif link[0].startswith('/redirect?redir_token=') and link[2].startswith('q='):
+			print('    [+]' + link[2].replace('q=', '').replace('%3A',':').replace('%2F','/'))
+		elif link[0].startswith('/redirect?event=') and link[2].startswith('redir_token='):
+			print('    [+]' + link[1].replace('q=', '').replace('%3A',':').replace('%2F','/'))
+		elif link[0].startswith('/redirect?redir_token=') and link[2].startswith('event='):
+			print('    [+]' + link[1].replace('q=', '').replace('%3A',':').replace('%2F','/'))
+		elif link[0].startswith('/redirect?event=') and link[2].startswith('q='):
+			print('    [+]' + link[2].replace('q=', '').replace('%3A',':').replace('%2F','/'))
+		else:
+			pass
+
 def twitter_scraper(name):
 	try:
 		my_url = "https://twitter.com/" + name
@@ -62,7 +78,7 @@ def twitter_scraper(name):
 
 def youtube_scraper(name):
 	try:
-		my_url = "https://youtube.com/results?search_query=" + name
+		my_url = "https://youtube.com/results?search_query="+ name.replace('_', '+')
 		uPage = uReq(my_url)
 		read_page = uPage.read()
 		uPage.close()
@@ -110,37 +126,8 @@ def youtube_scraper(name):
 						links = get_links.findAll("li", {"class":"channel-links-item"})
 						loc = get_loc.text.replace('\n', '').replace(' ' * 8, '')
 						print(' [+]Location: ' + loc)
-						
 						print(' [+]Usefull links:')
-						for i in links:
-							link = i.a["href"]
-							if link.startswith('/redirect?q='):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[12:-95])
-							elif link.startswith('/redirect?q=') and link.endswith('&event=channel_description'):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[12:-95])
-							elif link.startswith('/redirect?q=') and link.endswith('&event=channel_banner'):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[12:-90])
-							elif link.startswith('/redirect?event=channel_description&redir_token='):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[107:])
-							elif link.startswith('/redirect?redir_token='):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[107:])
-							elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_banner'):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[81:-21])
-							elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_description'):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[81:-26])
-							elif link.startswith('/redirect?event=channel_banner&redir_token='):
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[102:])
-							else:
-								a = link.replace('%3A', ':').replace('%2F','/')
-								print('    [#]' + a[32:-69])
+						beautify_link(links)
 					except Exception:
 						print("[-]Site doesn't have any linked sites")
 				break
@@ -188,35 +175,7 @@ def youtube_scraper(name):
 								print(' [+]Location: ' + loc)
 								
 								print(' [+]Usefull links:')
-								for i in links:
-									link = i.a["href"]
-									if link.startswith('/redirect?q='):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[12:-95])
-									elif link.startswith('/redirect?q=') and link.endswith('&event=channel_description'):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[12:-95])
-									elif link.startswith('/redirect?q=') and link.endswith('&event=channel_banner'):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[12:-90])
-									elif link.startswith('/redirect?event=channel_description&redir_token='):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[107:])
-									elif link.startswith('/redirect?redir_token='):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[107:])
-									elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_banner'):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[81:-21])
-									elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_description'):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[81:-26])
-									elif link.startswith('/redirect?event=channel_banner&redir_token='):
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[102:])
-									else:
-										a = link.replace('%3A', ':').replace('%2F','/')
-										print('    [#]' + a[32:-69])
+								beautify_link(links)
 							except Exception:
 								print("[-]Site doesn't have any linked sites")
 					break
@@ -254,44 +213,13 @@ def youtube_scraper(name):
 									print(' [+]Location: ' + loc)
 									
 									print(' [+]Usefull links:')
-									for i in links:
-										link = i.a["href"]
-										if link.startswith('/redirect?q='):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[12:-95])
-										elif link.startswith('/redirect?q=') and link.endswith('&event=channel_description'):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[12:-95])
-										elif link.startswith('/redirect?q=') and link.endswith('&event=channel_banner'):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[12:-90])
-										elif link.startswith('/redirect?event=channel_description&redir_token='):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[107:])
-										elif link.startswith('/redirect?redir_token='):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[107:])
-										elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_banner'):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[81:-21])
-										elif link.startswith('/redirect?redir_token=') and link.endswith('&event=channel_description'):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[81:-26])
-										elif link.startswith('/redirect?event=channel_banner&redir_token='):
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('    [#]' + a[102:])
-										else:
-											a = link.replace('%3A', ':').replace('%2F','/')
-											print('           | ' + a[32:-69])
+									beautify_link(links)
 								except Exception:
 									print("[-]Site doesn't have any linked sites")
 							print('\n')
 						break
-					else:
-						print('')
 	except Exception:
 		print("[-]This user doesn't exist!")
-
 
 def instagram_scraper(name):
 	my_url = "https://instagram.com/" + name
