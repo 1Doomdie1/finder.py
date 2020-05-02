@@ -1,11 +1,13 @@
-import sys, os, requests
+import sys, os, requests, getopt
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen as uReq
 
 
 def usage():
 	print('[!] usage: python3 finder.py <service> <name>\n'\
-	'[+] services: twiter, youtube, instagram, github')
+	'[+] services: twiter/-tw, youtube/-yt, instagram/-insta, github/-gh\n'\
+	'\n[+] The spaces in names should be replaced with "_"\n'\
+	'[!] Example: python3 finder.py -yt John_Doe')
 	sys.exit()
 	return
 
@@ -57,10 +59,11 @@ def twitter_scraper(name):
 		location = getting_location.text.replace('\n', '').replace('              ', '').replace('        ', '.').replace("\n", '')
 		profile_header = getting_profile_header.text
 
-		print("[+]Followed by " + followers_count + "people.")
-		print("[+]Following "+ following_count + "people.")
-		print("[+]" + tweets_cont +"tweets.")
-		print("[+]Joined twitter on " + date_of_joining +".")
+		print("[!]Fetching data for " + name)
+		print("  [+]Followed by " + followers_count + "people.")
+		print("  [+]Following "+ following_count + "people.")
+		print("  [+]" + tweets_cont +"tweets.")
+		print("  [+]Joined twitter on " + date_of_joining +".")
 
 		try:
 			getting_bday = page_soup.find("span", {"title":"Public"})
@@ -69,27 +72,28 @@ def twitter_scraper(name):
 			bday = getting_bday.text.replace("    Born ", '').replace('\n', '')
 			linked_sites = getting_linked_sites.a['title']
 			
-			print("[+]Born in "+ bday +".")
-			print("[+]Linked site: "+ linked_sites)
+			print("  [+]Born in "+ bday +".")
+			print("  [+]Linked site: "+ linked_sites)
 		except Exception:
 			pass			
 
 		if len(location) == 0:
 			pass
 		else:
-			print("[+]Leaves in "+ location)
+			print("  [+]Leaves in "+ location)
 
 		if len(profile_header) == 0:
 			pass
 		else:
-			print("[+]Profile header: " + profile_header)
+			print("  [+]Profile header: " + profile_header)
+		print("[!]Done")
 
 	except Exception:
 		print("[-]This user doesn't exist.")
 
 def youtube_scraper(name):
 	try:
-		my_url = "https://youtube.com/results?search_query="+ name.replace('_', '+')
+		my_url = "https://youtube.com/results?search_query="+ name
 		uPage = uReq(my_url)
 		read_page = uPage.read()
 		uPage.close()
@@ -250,15 +254,15 @@ def main():
 	if len(sys.argv) != 3:
 		usage()
 	s = sys.argv
-	service, name= s[1],s[2]
+	service, name = s[1], s[2]
 
-	if service == 'twitter' or service == 'tw':
+	if service == 'twitter' or service == '-tw':
 		twitter_scraper(name)
-	elif service == 'youtube' or service == 'yt':
+	elif service == 'youtube' or service == '-yt':
 		youtube_scraper(name)
-	elif service == 'instagram' or service == 'insta':
+	elif service == 'instagram' or service == '-insta':
 		instagram_scraper(name)
-	elif service == 'github' or service == 'gh':
+	elif service == 'github' or service == '-gh':
 		github_scraper(name)
 	else:
 		print(f'[-] ERROR: unknown service: {service}')
@@ -271,4 +275,3 @@ if __name__ == '__main__':
 	except KeyboardInterrupt:
 		print('\n[!] WARNING: interrupted by user\n')
 		os._exit(1)
-		
