@@ -1,14 +1,14 @@
-import sys, os 
+import sys, os, requests
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen as uReq
 
 def usage():
 	print('[!] usage: python3 finder.py <service> <name>\n'\
-	'[+] services: twiter, youtube, instagram')
+	'[+] services: twiter, youtube, instagram, github')
 	sys.exit()
 	return
 
-def beautify_link(link_to_beautifi):
+def beautify_yt_link(link_to_beautifi):
 	for i in link_to_beautifi:
 		link = i.a["href"].split('&')
 		if link[0].startswith('/redirect?q='):
@@ -23,6 +23,16 @@ def beautify_link(link_to_beautifi):
 			print('    [+]' + link[2].replace('q=', '').replace('%3A',':').replace('%2F','/'))
 		else:
 			pass
+
+def github_scraper(name):
+	try:
+		r = requests.get('https://api.github.com/users/' + name, auth=('test804', 'pl,098OKM'))
+		print('[!]Fetching data for ' + name)
+		for i in r.text.split(','):
+			print('  [+]'+ i.replace('"', '').replace('{', '').replace('}', ''))
+		print('[!]Done!')
+	except Exception:
+		print('[-]No user found with that name!')
 
 def twitter_scraper(name):
 	try:
@@ -127,7 +137,7 @@ def youtube_scraper(name):
 						loc = get_loc.text.replace('\n', '').replace(' ' * 8, '')
 						print(' [+]Location: ' + loc)
 						print(' [+]Usefull links:')
-						beautify_link(links)
+						beautify_yt_link(links)
 					except Exception:
 						print("[-]Site doesn't have any linked sites")
 				break
@@ -213,7 +223,7 @@ def youtube_scraper(name):
 									print(' [+]Location: ' + loc)
 									
 									print(' [+]Usefull links:')
-									beautify_link(links)
+									beautify_yt_link(links)
 								except Exception:
 									print("[-]Site doesn't have any linked sites")
 							print('\n')
@@ -247,6 +257,8 @@ def main():
 		youtube_scraper(name)
 	elif service == 'instagram' or service == 'insta':
 		instagram_scraper(name)
+	elif service == 'github' or service == 'gh':
+		github_scraper(name)
 	else:
 		print(f'[-] ERROR: unknown service: {service}')
 		os._exit(1)
