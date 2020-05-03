@@ -1,15 +1,7 @@
-import sys, os, requests, getopt
+import sys, os, requests, argparse
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen as uReq
 
-
-def usage():
-	print('[!] usage: python3 finder.py <service> <name>\n'\
-	'[+] services: twiter/-tw, youtube/-yt, instagram/-insta, github/-gh\n'\
-	'\n[+] The spaces in names should be replaced with "_"\n'\
-	'[!] Example: python3 finder.py -yt John_Doe')
-	sys.exit()
-	return
 
 def beautify_yt_link(link_to_beautifi):
 	for i in link_to_beautifi:
@@ -87,9 +79,11 @@ def twitter_scraper(name):
 		else:
 			print("  [+]Profile header: " + profile_header)
 		print("[!]Done")
-
+		
 	except Exception:
 		print("[-]This user doesn't exist.")
+	
+	return date_of_joining, tweets_cont, followers_count, following_count, location, profile_header, bday, linked_sites, profile_header
 
 def youtube_scraper(name):
 	try:
@@ -249,25 +243,24 @@ def instagram_scraper(name):
 		edited = i.replace('\n', '').replace(' ', '').replace('\/', '/').replace('@','').replace('"', '').replace('</script>', '').replace('<scripttype=application/ld+json>', '').replace('{','').replace('}','')
 		print('[+]' + edited)
 
-
 def main():
-	if len(sys.argv) != 3:
-		usage()
-	s = sys.argv
-	service, name = s[1], s[2]
+	parser = argparse.ArgumentParser(prog = 'python3 finder.py')
+	parser.add_argument('-s', '--service', type = str, metavar = '', required = True, help = 'Servces: youtube, instagram, github, twitter or yt, insta, gh, tw')
+	parser.add_argument('-u', '--username', type = str, metavar = '', required = True, help = 'username')
+	args = parser.parse_args()
 
-	if service == 'twitter' or service == '-tw':
-		twitter_scraper(name)
-	elif service == 'youtube' or service == '-yt':
-		youtube_scraper(name)
-	elif service == 'instagram' or service == '-insta':
-		instagram_scraper(name)
-	elif service == 'github' or service == '-gh':
-		github_scraper(name)
+	if args.service == 'github' or args.service == 'gh':
+		github_scraper(args.username)
+	elif args.service == 'youtube' or args.service == 'yt':
+		youtube_scraper(args.username)
+	elif args.service == 'twitter' or args.service == 'tw':
+		twitter_scraper(args.username)
+	elif args.service == 'instagram' or args.service == 'insta':
+		instagram_scraper(args.username)
 	else:
-		print(f'[-] ERROR: unknown service: {service}')
-		os._exit(1)
-
+		print('[!]Unknown service!')
+		parser.print_help()
+		sys.exit(1)
 
 if __name__ == '__main__':
 	try:
