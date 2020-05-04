@@ -19,6 +19,21 @@ def beautify_yt_link(link_to_beautifi):
 		else:
 			pass
 
+def get_individual_pages_data(url):
+	target_uPage = uReq(url)
+	target_read_page = target_uPage.read()
+	target_uPage.close()
+	target_page_soup = soup(target_read_page, "html.parser")
+	return target_page_soup
+
+def get_page(url, name):
+	my_url = url + str(name)
+	uPage = uReq(my_url)
+	read_page = uPage.read()
+	uPage.close()
+	page_soup = soup(read_page, "html.parser")
+	return page_soup
+
 def github_scraper(name):
 	try:
 		r = requests.get('https://api.github.com/users/' + name, auth=('test804', 'pl,098OKM'))
@@ -31,12 +46,8 @@ def github_scraper(name):
 
 def twitter_scraper(name):
 	try:
-		my_url = "https://twitter.com/" + name
-		uPage = uReq(my_url)
-		read_page = uPage.read()
-		uPage.close()
-		page_soup = soup(read_page, "html.parser")
-
+		page_soup = get_page("https://twitter.com/", name)
+		
 		getting_date_of_joining = page_soup.find("span", {"class":"ProfileHeaderCard-joinDateText js-tooltip u-dir"})
 		getting_tweets_count = page_soup.find("li", {"class":"ProfileNav-item ProfileNav-item--tweets is-active"})
 		getting_followings_count = page_soup.find("li", {"class":"ProfileNav-item ProfileNav-item--following"})
@@ -69,84 +80,63 @@ def twitter_scraper(name):
 		except Exception:
 			pass			
 
-		if len(location) == 0:
-			pass
-		else:
+		if len(location) != 0:
 			print("  [+]Leaves in "+ location)
-
-		if len(profile_header) == 0:
-			pass
-		else:
+			
+		if len(profile_header) != 0:
 			print("  [+]Profile header: " + profile_header)
+			
 		print("[!]Done")
 		
 	except Exception:
 		print("[-]This user doesn't exist.")
-	
-	return date_of_joining, tweets_cont, followers_count, following_count, location, profile_header, bday, linked_sites, profile_header
 
 def youtube_scraper(name):
 	try:
-		my_url = "https://youtube.com/results?search_query="+ name
-		uPage = uReq(my_url)
-		read_page = uPage.read()
-		uPage.close()
-		page_soup = soup(read_page, "html.parser")
-
+		page_soup = get_page("https://youtube.com/results?search_query=", name)
 		getting_total_channels = page_soup.findAll("div", {"class":"yt-lockup yt-lockup-tile yt-lockup-channel vve-check clearfix yt-uix-tile"})
-		channels_num = len(getting_total_channels)
-
 		channels = []
 
-		if channels_num == 0:
+		if len(getting_total_channels) == 0:
 			print('[-]No channels found with that name!')
 
-		elif channels_num == 1:
-			print("[+]I have found " + str(channels_num) + " channel:")
+		elif len(getting_total_channels) == 1:
+			print("[+]I have found ", len(getting_total_channels), " channel:")
 			print(" [+]https://youtube.com" + getting_total_channels[0].div.a['href'])
-			ch = getting_total_channels[0].div.a['href']
-			channels.append(ch)
 
-			while True:
-				target_url = "https://youtube.com" + channels[0] +"/about"
-				target_uPage = uReq(target_url)
-				target_read_page = target_uPage.read()
-				target_uPage.close()
-				target_page_soup = soup(target_read_page, "html.parser")
+			target_url = "https://youtube.com" + getting_total_channels[0].div.a['href'] +"/about"
+			target_page_soup = get_individual_pages_data(target_url)
 
-				getting_subs = target_page_soup.find("span", {"class":"yt-subscription-button-subscriber-count-branded-horizontal subscribed yt-uix-tooltip"})
-				getting_total_views = target_page_soup.findAll("span", {"class":"about-stat"})
-				getting_joining_date = target_page_soup.findAll("span", {"class":"about-stat"})
-				
-				subs = getting_subs.text.replace('.', '')
-				views = getting_total_views[0].text.replace(" • ", "")
-				join_date = getting_joining_date[1].text
+			getting_subs = target_page_soup.find("span", {"class":"yt-subscription-button-subscriber-count-branded-horizontal subscribed yt-uix-tooltip"})
+			getting_total_views = target_page_soup.findAll("span", {"class":"about-stat"})
+			getting_joining_date = target_page_soup.findAll("span", {"class":"about-stat"})
+			
+			subs = getting_subs.text.replace('.', '')
+			views = getting_total_views[0].text.replace(" • ", "")
+			join_date = getting_joining_date[1].text
 
-				if len(target_page_soup.title) == 0:
-					print("[-]The channel doesn't have an 'About' section")
-				else:
-					print(' [#]' + subs + ' subs.')
-					print(' [#]'+ views)
-					print(' [#]' + join_date)
-					try:
-						get_loc = target_page_soup.find("span", {"class":"country-inline"})
-						get_links = target_page_soup.find("ul", {"class":"about-secondary-links"})
-						
-						links = get_links.findAll("li", {"class":"channel-links-item"})
-						loc = get_loc.text.replace('\n', '').replace(' ' * 8, '')
-						print(' [+]Location: ' + loc)
-						print(' [+]Usefull links:')
-						beautify_yt_link(links)
-					except Exception:
-						print("[-]Site doesn't have any linked sites")
-				break
-
+			if len(target_page_soup.title) == 0:
+				print("[-]The channel doesn't have an 'About' section")
+			else:
+				print(' [#]' + subs + ' subs.')
+				print(' [#]'+ views)
+				print(' [#]' + join_date)
+				try:
+					get_loc = target_page_soup.find("span", {"class":"country-inline"})
+					get_links = target_page_soup.find("ul", {"class":"about-secondary-links"})
+					
+					links = get_links.findAll("li", {"class":"channel-links-item"})
+					loc = get_loc.text.replace('\n', '').replace(' ' * 8, '')
+					print(' [+]Location: ' + loc)
+					print(' [+]Usefull links:')
+					beautify_yt_link(links)
+				except Exception:
+					print("[-]Site doesn't have any linked sites")
 		else:
-			print("[!]I have found " + str(channels_num) + " channels:")
-			for i in range(channels_num):
+			print("[!]I have found ", len(getting_total_channels), " channels:")
+			for i in range(len(getting_total_channels)):
 				print(" ["+ str(i + 1) +"] https://youtube.com" + getting_total_channels[i].div.a['href'])
-				ch = getting_total_channels[i].div.a['href']
-				channels.append(ch)
+				channels.append(getting_total_channels[i].div.a['href'])
 
 			print('[?]Select the channel number that u want to extract data from or type all')
 			while True:
@@ -154,10 +144,7 @@ def youtube_scraper(name):
 				try:
 					if int(chose_a_channel) <= len(channels):
 						target_url = "https://youtube.com" + channels[int(chose_a_channel) - 1] +"/about"
-						target_uPage = uReq(target_url)
-						target_read_page = target_uPage.read()
-						target_uPage.close()
-						target_page_soup = soup(target_read_page, "html.parser")
+						target_page_soup = get_individual_pages_data(target_url)
 						
 						getting_subs = target_page_soup.find("span", {"class":"yt-subscription-button-subscriber-count-branded-horizontal subscribed yt-uix-tooltip"})
 						getting_total_views = target_page_soup.findAll("span", {"class":"about-stat"})
@@ -187,15 +174,14 @@ def youtube_scraper(name):
 								beautify_link(links)
 							except Exception:
 								print("[-]Site doesn't have any linked sites")
+					else:
+						print('[!]Number out of range')
 					break
 				except Exception:
 					if chose_a_channel == 'all':
 						for i in channels:
 							target_url = "https://youtube.com" + i +"/about"
-							target_uPage = uReq(target_url)
-							target_read_page = target_uPage.read()
-							target_uPage.close()
-							target_page_soup = soup(target_read_page, "html.parser")
+							target_page_soup = get_individual_pages_data(target_url)
 
 							getting_subs = target_page_soup.find("span", {"class":"yt-subscription-button-subscriber-count-branded-horizontal subscribed yt-uix-tooltip"})
 							getting_total_views = target_page_soup.findAll("span", {"class":"about-stat"})
@@ -231,22 +217,19 @@ def youtube_scraper(name):
 		print("[-]This user doesn't exist!")
 
 def instagram_scraper(name):
-	my_url = "https://instagram.com/" + name
-	uPage = uReq(my_url)
-	read_page = uPage.read()
-	uPage.close()
-	page_soup = soup(read_page, "html.parser")
-
-	a = page_soup.find("script", {"type":"application/ld+json"})
-	b = str(a).split(',')
-	for i in b:
-		edited = i.replace('\n', '').replace(' ', '').replace('\/', '/').replace('@','').replace('"', '').replace('</script>', '').replace('<scripttype=application/ld+json>', '').replace('{','').replace('}','')
-		print('[+]' + edited)
-
+	try:
+		page_soup = get_page("https://instagram.com/", name)
+		get_info = page_soup.find("script", {"type":"application/ld+json"})
+		processed_data = str(get_info).split(',')
+		for i in processed_data:
+			edited = i.replace('\n', '').replace(' ', '').replace('\/', '/').replace('@','').replace('"', '').replace('</script>', '').replace('<scripttype=application/ld+json>', '').replace('{','').replace('}','')
+			print('[+]' + edited)
+	except Exception:
+		print('[!]No user with that name was found!')
 def main():
 	parser = argparse.ArgumentParser(prog = 'python3 finder.py')
 	parser.add_argument('-s', '--service', type = str, metavar = '', required = True, help = 'Servces: youtube, instagram, github, twitter or yt, insta, gh, tw')
-	parser.add_argument('-u', '--username', type = str, metavar = '', required = True, help = 'username')
+	parser.add_argument('-u', '--username', type = str, metavar = '', required = True, help = 'Username. For yt, insta, twitter if the user have 2 names the space between should be replaced with "_" ')
 	args = parser.parse_args()
 
 	if args.service == 'github' or args.service == 'gh':
